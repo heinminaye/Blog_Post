@@ -82,7 +82,7 @@ export async function PUT(
       );
     }
 
-    const { id } = await params; // Await the params
+    const { id } = await params;
     const post = await Post.findByIdAndUpdate(id, value, { 
       new: true 
     }).populate('author', 'email');
@@ -123,7 +123,7 @@ export async function DELETE(
       );
     }
 
-    const { id } = await params; // Await the params
+    const { id } = await params;
     const post = await Post.findByIdAndDelete(id);
 
     if (!post) {
