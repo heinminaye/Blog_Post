@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { PostResponse } from '@/types/post';
 import { formatDate } from '@/lib/uiUtils';
 import { useState, useRef, useEffect } from 'react';
-import { FiMoreHorizontal, FiEdit, FiTrash2, FiEye, FiX } from 'react-icons/fi';
+import { FiMoreHorizontal, FiEdit, FiTrash2, FiEye } from 'react-icons/fi';
 import { deletePost } from '@/lib/api/api';
 import { toast } from 'sonner';
 
