@@ -61,7 +61,7 @@ export const fetchPostBySlug = async (slug: string): Promise<ApiResponse<PostRes
   return handleApiResponse<PostResponse>(response);
 };
 
-export const createPost = async (postData: any): Promise<ApiResponse<PostResponse>> => {
+export const createPost = async (postData: unknown): Promise<ApiResponse<PostResponse>> => {
   const response = await fetch('/api/posts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -70,7 +70,7 @@ export const createPost = async (postData: any): Promise<ApiResponse<PostRespons
   return handleApiResponse<PostResponse>(response);
 };
 
-export const updatePost = async (id: string, postData: any): Promise<ApiResponse<PostResponse>> => {
+export const updatePost = async (id: string, postData: unknown): Promise<ApiResponse<PostResponse>> => {
   const response = await fetch(`/api/posts/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },

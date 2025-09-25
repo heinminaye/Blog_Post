@@ -53,7 +53,7 @@ const ContentBlockSchema = new Schema<IContentBlock>(
   { 
     _id: false,
     toJSON: {
-      transform: (doc, ret: Record<string, any>) => {
+      transform: (doc, ret: Record<string, unknown>) => {
         Object.keys(ret).forEach(key => ret[key] == null && delete ret[key]);
         return ret;
       }

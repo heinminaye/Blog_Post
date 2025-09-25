@@ -5,7 +5,7 @@ export type ApiErrorResponse = {
   success: false;
   error: string;
   message: string;
-  details?: any;
+  details?: unknown;
   statusCode: number;
 };
 
@@ -21,7 +21,7 @@ export function apiErrorResponse(
   error: string,
   message: string,
   statusCode: number,
-  details?: any
+  details?: unknown
 ): NextResponse<ApiErrorResponse> {
   return NextResponse.json(
     {
@@ -72,6 +72,7 @@ export async function parseJsonRequest(request: Request) {
   try {
     return await request.json();
   } catch (error) {
+    console.log('JSON parse error:', error);
     return apiErrorResponse(
       'Invalid request',
       'Malformed JSON received',

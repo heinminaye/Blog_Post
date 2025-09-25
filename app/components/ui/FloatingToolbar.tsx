@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 interface FloatingToolbarProps {
   isVisible: boolean;
   onBold: () => void;
@@ -21,16 +19,14 @@ export default function FloatingToolbar({
   onAddBelow,
   onRemove,
 }: FloatingToolbarProps) {
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-
   if (!isVisible) return null;
 
   return (
     <div
       className="absolute flex gap-1 p-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-10 border border-gray-200 dark:border-gray-700"
       style={{
-        top: `${position.top}px`,
-        left: `${position.left}px`,
+        top: `${0}px`,
+        left: `${0}px`,
         transform: 'translateY(-100%)'
       }}
     >

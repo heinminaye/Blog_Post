@@ -17,7 +17,7 @@ export async function verifyTokenForMiddleware(token: string) {
       role: string;
     };
   } catch (error) {
-    throw new Error('Invalid token');
+    throw new Error(error instanceof Error ? error.message : 'Invalid token');
   }
 }
 
@@ -32,8 +32,13 @@ export async function getCurrentUserForMiddleware(req: NextRequest) {
   try {
     const decoded = await verifyTokenForMiddleware(token);
     return decoded;
-  } catch (error: any) {
-    console.log('Token verification failed:', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+        console.log('Token verification failed:', error.message);
+    } else {
+        console.log('Token verification failed: Unknown error');
+    }
+    
     return null;
   }
 }

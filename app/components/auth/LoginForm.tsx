@@ -70,14 +70,13 @@ export default function LoginForm() {
       } else {
         setErrors({ general: response.message || "Login failed. Please try again." });
       }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      
-      if (error.message === 'Failed to login') {
-        setErrors({ general: "Invalid email or password. Please try again." });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+         setErrors({ general: "Invalid email or password. Please try again." });
       } else {
-        setErrors({ general: "Network error. Please try again." });
+         setErrors({ general: "Network error. Please try again." });
       }
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }

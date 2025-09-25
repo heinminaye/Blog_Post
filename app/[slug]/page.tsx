@@ -21,7 +21,7 @@ import {
   FaYoutube,
   FaQuestionCircle,
 } from "react-icons/fa";
-import { FiArrowLeft, FiEdit3, FiTrash2, FiX } from "react-icons/fi";
+import { FiArrowLeft, FiEdit3, FiTrash2 } from "react-icons/fi";
 import {
   SiJavascript,
   SiTypescript,
@@ -40,10 +40,8 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<PostResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const deleteConfirmRef = useRef<HTMLDivElement>(null);
   const [copiedStates, setCopiedStates] = useState<Record<number, boolean>>({});
 
@@ -93,10 +91,6 @@ export default function PostDetailPage() {
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-
       if (
         deleteConfirmRef.current &&
         !deleteConfirmRef.current.contains(event.target as Node)
@@ -125,7 +119,8 @@ export default function PostDetailPage() {
           } else {
             setError(response.message || "Failed to fetch post");
           }
-        } catch (error) {
+        } catch (error: unknown) {
+          console.error("Error fetching post:", error);
           setError("An unexpected error occurred");
         } finally {
           setLoading(false);
@@ -151,7 +146,6 @@ export default function PostDetailPage() {
 
   const handleDeleteClick = () => {
     setShowDeleteConfirm(true);
-    setMenuOpen(false);
   };
 
   const handleCancelDelete = () => {

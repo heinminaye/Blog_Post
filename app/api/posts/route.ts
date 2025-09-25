@@ -64,7 +64,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiRespons
     }
 
     // Build the query object for multiple posts
-    const query: any = { published: true };
+    const query: Record<string, unknown> = { published: true };
     
     // Add tag filtering if provided
     if (tag) {
