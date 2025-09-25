@@ -1,0 +1,54 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { PostResponse } from "@/types/post";
+import PostEditor from "@/components/admin/PostEditor";
+import { fetchPostBySlug } from "@/lib/api/api";
+
+export default function EditPostPage() {
+  const { slug } = useParams(); // Get slug from the URL
+  const router = useRouter();
+  const [post, setPost] = useState<PostResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!slug) return;
+
+    const fetchPost = async () => {
+      try {
+        const res = await fetchPostBySlug(slug as string);
+        if (!res.success) {
+          throw new Error("Post not found");
+        }
+        setPost(res.data);
+      } catch (error: any) {
+        toast.error(error.message || "Failed to load post");
+        router.back();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
+  }, [slug, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
+        Loading post...
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        Post not found
+      </div>
+    );
+  }
+
+  return <PostEditor initialPost={post} />;
+}
