@@ -208,7 +208,7 @@ export default function InfinitePostList() {
           onRetry={() => fetchPostsData(1, searchQuery, selectedCategory)} 
         />
 
-        <div className="grid grid-cols-1  md:grid-cols-2 xl:grid-cols-3 px-4 sm:px-6 lg:px-8 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 px-4 sm:px-6 lg:px-8 gap-6 lg:gap-8">
           <AnimatePresence mode="wait">
             {posts.length > 0 ? (
               <>
@@ -247,7 +247,7 @@ export default function InfinitePostList() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 py-5 col-span-2 "
+              className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8 py-5 col-span-3"
             >
               {[...Array(4)].map((_, i) => (
                 <PostSkeleton key={i} />
