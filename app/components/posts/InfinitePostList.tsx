@@ -48,10 +48,12 @@ export default function InfinitePostList() {
         setHasMore(
           response.data.pagination.page < response.data.pagination.totalPages
         );
-      } catch (err: any) {
-        const errorMessage = err.message || "Failed to fetch posts";
-        setError(errorMessage);
-        console.error("Error:", err);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+         setError("Failed to fetch posts");
+        }
       } finally {
         setLoading(false);
         setIsSearching(false);
@@ -285,7 +287,7 @@ export default function InfinitePostList() {
                 <FiCheck className="w-8 h-8 lg:w-10 lg:h-10 text-purple-500" />
               </div>
               <p className="text-lg lg:text-xl font-medium text-gray-300 mb-1 lg:mb-2">
-                You've reached the end
+                {`You've reached the end!`}
               </p>
               <p className="text-gray-500 text-sm lg:text-base">
                 No more articles to load

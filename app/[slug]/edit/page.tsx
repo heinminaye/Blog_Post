@@ -23,9 +23,13 @@ export default function EditPostPage() {
           throw new Error("Post not found");
         }
         setPost(res.data);
-      } catch (error: any) {
-        toast.error(error.message || "Failed to load post");
-        router.back();
+      } catch (error: unknown) {
+         if (error instanceof Error) {
+            toast.error(error.message);
+          } else {
+            toast.error("Failed to load post");
+          }
+          router.back();
       } finally {
         setLoading(false);
       }

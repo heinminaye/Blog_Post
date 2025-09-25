@@ -278,7 +278,7 @@ export default function PostDetailPage() {
               Post Not Found
             </h2>
             <p className="text-gray-400 mb-6">
-              The post you're looking for doesn't exist.
+              {`The post you're looking for doesn't exist.`}
             </p>
             <button
               onClick={() => router.push("/")}

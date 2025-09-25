@@ -273,9 +273,12 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
         toast.success(publish ? "Post published!" : "Draft saved");
         router.push("/");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to save post");
-      console.error("Submission error:", error);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to save post");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -581,7 +584,7 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
                       ))
                     ) : tagSearch ? (
                       <div className="text-gray-400 px-3 py-2 text-sm">
-                        No tags found matching "{tagSearch}"
+                         {`No tags found matching "${tagSearch}"`}
                       </div>
                     ) : (
                       <div className="text-gray-400 px-3 py-2 text-sm">
