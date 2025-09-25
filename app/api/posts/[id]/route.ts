@@ -16,12 +16,12 @@ import { PostUpdateSchema } from '@/lib/validation/postSchemas';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<PostResponse>>> {
   try {
     await dbConnect();
-    const { id } = await params;
-    const isObjectId =/^[0-9a-fA-F]{24}$/.test(id);
+    const { id } = await params; // Await the params
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
     
     let post;
     if (isObjectId) {
@@ -53,7 +53,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<PostResponse>>> {
   try {
     await dbConnect();
@@ -82,7 +82,8 @@ export async function PUT(
       );
     }
 
-    const post = await Post.findByIdAndUpdate(params.id, value, { 
+    const { id } = await params; // Await the params
+    const post = await Post.findByIdAndUpdate(id, value, { 
       new: true 
     }).populate('author', 'email');
 
@@ -109,7 +110,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<{ success: boolean }>>> {
   try {
     await dbConnect();
@@ -122,7 +123,8 @@ export async function DELETE(
       );
     }
 
-    const post = await Post.findByIdAndDelete(params.id);
+    const { id } = await params; // Await the params
+    const post = await Post.findByIdAndDelete(id);
 
     if (!post) {
       return apiErrorResponse(
