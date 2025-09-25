@@ -1,15 +1,15 @@
+import { NextRequest } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
-import { 
-  apiErrorResponse, 
-  apiSuccessResponse 
-} from '@/lib/utils';
+import { apiErrorResponse, apiSuccessResponse } from '@/lib/utils';
+
 export async function DELETE(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { publicId: string } }
 ) {
   try {
     const publicId = decodeURIComponent(params.publicId);
     const result = await cloudinary.uploader.destroy(publicId);
+    
     if (result.result === 'not found') {
       return apiErrorResponse(
         'Image not found',
@@ -17,7 +17,7 @@ export async function DELETE(
         404
       );
     }
-    
+
     return apiSuccessResponse({
       success: true,
       publicId,
