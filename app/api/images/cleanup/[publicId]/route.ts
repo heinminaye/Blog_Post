@@ -3,12 +3,14 @@ import { v2 as cloudinary } from 'cloudinary';
 import { apiErrorResponse, apiSuccessResponse } from '@/lib/utils';
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { publicId: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ publicId: string }> }
 ) {
   try {
-    const publicId = decodeURIComponent(params.publicId);
-    const result = await cloudinary.uploader.destroy(publicId);
+    const { publicId } = await params;
+    const decodedPublicId = decodeURIComponent(publicId);
+    
+    const result = await cloudinary.uploader.destroy(decodedPublicId);
     
     if (result.result === 'not found') {
       return apiErrorResponse(
@@ -20,7 +22,7 @@ export async function DELETE(
 
     return apiSuccessResponse({
       success: true,
-      publicId,
+      publicId: decodedPublicId,
       result: result.result
     });
     
