@@ -230,7 +230,7 @@ const ImageBlock = ({
               width={block.width || 1200}
               height={block.height || 800}
               className="w-full h-auto max-h-96 object-contain"
-              onLoad={() => console.log("Image loaded successfully")}
+              onLoad={() => toast.success("Image loaded successfully")}
               onError={() => toast.error("Failed to load image")}
             />
           </div>

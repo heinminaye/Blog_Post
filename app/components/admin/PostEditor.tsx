@@ -232,7 +232,6 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
   };
 
   const handleSubmit = async (publish: boolean) => {
-    console.log(blocks);
     if (!title.trim()) {
       toast.error("Title is required");
       return;

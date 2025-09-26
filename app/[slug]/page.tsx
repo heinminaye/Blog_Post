@@ -700,7 +700,7 @@ export default function PostDetailPage() {
                 const embedUrl = getEmbedUrl();
 
                 return (
-                  <div key={index} className="my-6">
+                  <div key={index} className="">
                     {embedUrl ? (
                       <div className="relative rounded-xl overflow-hidden bg-black border border-gray-700 shadow-lg">
                         <div className="relative w-full h-0 pb-[56.25%]">

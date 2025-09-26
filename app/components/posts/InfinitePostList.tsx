@@ -36,12 +36,17 @@ export default function InfinitePostList() {
 
       try {
         const tag = category !== "all" ? category : null;
-        const response: ApiResponse<PaginatedPostResponse> = await fetchPosts(page, 12, search, tag);
-        
+        const response: ApiResponse<PaginatedPostResponse> = await fetchPosts(
+          page,
+          12,
+          search,
+          tag
+        );
+
         if (!response.success) {
           setError(response.message || "Failed to fetch posts");
         }
-        
+
         setPosts((prev) =>
           page === 1 ? response.data.data : [...prev, ...response.data.data]
         );
@@ -52,7 +57,7 @@ export default function InfinitePostList() {
         if (err instanceof Error) {
           setError(err.message);
         } else {
-         setError("Failed to fetch posts");
+          setError("Failed to fetch posts");
         }
       } finally {
         setLoading(false);
@@ -67,7 +72,7 @@ export default function InfinitePostList() {
     fetchPostsData(1, searchQuery, selectedCategory);
   }, [searchQuery, selectedCategory, fetchPostsData]);
 
-  // Manual scroll detection handler
+  // IntersectionObserver for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -79,14 +84,10 @@ export default function InfinitePostList() {
     );
 
     const currentLoader = loaderRef.current;
-    if (currentLoader) {
-      observer.observe(currentLoader);
-    }
+    if (currentLoader) observer.observe(currentLoader);
 
     return () => {
-      if (currentLoader) {
-        observer.unobserve(currentLoader);
-      }
+      if (currentLoader) observer.unobserve(currentLoader);
     };
   }, [hasMore, loading, isSearching]);
 
@@ -97,72 +98,57 @@ export default function InfinitePostList() {
     }
   }, [page, searchQuery, isSearching, selectedCategory, fetchPostsData]);
 
+  // Handle resize for mobile search
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768 && isSearchExpanded) {
         setIsSearchExpanded(false);
       }
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [isSearchExpanded]);
 
-  // Handle mobile search expansion
+  // Search handlers
   const handleSearchFocus = () => {
-    if (window.innerWidth < 768) {
-      setIsSearchExpanded(true);
-    }
+    if (window.innerWidth < 768) setIsSearchExpanded(true);
   };
-
   const handleSearchBlur = () => {
-    // Don't collapse immediately on blur to allow for button clicks
     setTimeout(() => {
-      if (window.innerWidth < 768 && !searchQuery) {
-        setIsSearchExpanded(false);
-      }
+      if (window.innerWidth < 768 && !searchQuery) setIsSearchExpanded(false);
     }, 200);
   };
-
   const handleMobileSearchClick = () => {
     setIsSearchExpanded(true);
-    setTimeout(() => {
-      searchRef.current?.focus();
-    }, 100);
+    setTimeout(() => searchRef.current?.focus(), 100);
   };
-
   const handleBackButtonClick = () => {
     setIsSearchExpanded(false);
     setSearchQuery("");
     searchRef.current?.blur();
   };
-
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
     setIsSearching(true);
     setPage(1);
   };
-
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setPage(1);
   };
-
   const handleClearSearch = () => {
     setSearchQuery("");
     setIsSearching(true);
     setPage(1);
-    if (window.innerWidth < 768) {
-      setIsSearchExpanded(false);
-    }
+    if (window.innerWidth < 768) setIsSearchExpanded(false);
   };
   const handlePostDelete = (deletedPostId: string) => {
-    setPosts(prevPosts => prevPosts.filter(post => post._id !== deletedPostId));
+    setPosts((prev) => prev.filter((post) => post._id !== deletedPostId));
   };
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center overflow-x-hidden">
         <LoadingDots />
       </div>
     );
@@ -170,72 +156,74 @@ export default function InfinitePostList() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-gray-100 flex flex-col">
-      <Navigation
-        ref={searchRef}
-        isSearchExpanded={isSearchExpanded}
-        searchQuery={searchQuery}
-        postsCount={posts.length}
-        onSearchChange={handleSearchChange}
-        onMobileSearchClick={handleMobileSearchClick}
-        onBackButtonClick={handleBackButtonClick}
-        onSearchFocus={handleSearchFocus}
-        onSearchBlur={handleSearchBlur}
-        hasToken={hasToken}
-        user={user}
-      />
-
-      {/* Main Content */}
-      <div className="flex-1 max-w-7xl mx-auto w-full">
-        {/* Hide category filters when search is expanded on mobile */}
-        <AnimatePresence>
-         
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CategoryFilters
-                selectedCategory={selectedCategory}
-                onCategoryChange={handleCategoryChange}
-              />
-            </motion.div>
-
-        </AnimatePresence>
-
-        <ErrorState 
-          error={error} 
-          onRetry={() => fetchPostsData(1, searchQuery, selectedCategory)} 
+      {/* Navigation */}
+      <div className="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-md">
+        <Navigation
+          ref={searchRef}
+          isSearchExpanded={isSearchExpanded}
+          searchQuery={searchQuery}
+          postsCount={posts.length}
+          onSearchChange={handleSearchChange}
+          onMobileSearchClick={handleMobileSearchClick}
+          onBackButtonClick={handleBackButtonClick}
+          onSearchFocus={handleSearchFocus}
+          onSearchBlur={handleSearchBlur}
+          hasToken={hasToken}
+          user={user}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 px-4 sm:px-6 lg:px-8 gap-6 lg:gap-8">
+        {/* Category Filters */}
+        <AnimatePresence>
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <CategoryFilters
+              selectedCategory={selectedCategory}
+              onCategoryChange={handleCategoryChange}
+            />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 max-w-7xl mx-auto w-full overflow-x-hidden">
+
+        {/* Error */}
+        <ErrorState
+          error={error}
+          onRetry={() => fetchPostsData(1, searchQuery, selectedCategory)}
+        />
+
+        {/* Posts Grid */}
+        <div className="grid grid-cols-1  pt-4 md:grid-cols-2 xl:grid-cols-3 px-4 sm:px-6 lg:px-8 gap-6 lg:gap-8 overflow-x-hidden">
           <AnimatePresence mode="wait">
             {posts.length > 0 ? (
-              <>
-                {posts.map((post, index) => (
-                  <motion.div
-                    key={post._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.4, delay: index * 0.03 }}
-                    layout
-                    className="transform hover:scale-[1.01] transition-transform duration-300"
-                  >
-                    <PostCard 
-                      post={post} 
-                      hasToken={hasToken}
-                      user={user}
-                      onPostDelete={handlePostDelete}
-                    />
-                  </motion.div>
-                ))}
-              </>
+              posts.map((post, index) => (
+                <motion.div
+                  key={post._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4, delay: index * 0.03 }}
+                  layout
+                  className="transform hover:scale-[1.01] transition-transform duration-300"
+                >
+                  <PostCard
+                    post={post}
+                    hasToken={hasToken}
+                    user={user}
+                    onPostDelete={handlePostDelete}
+                  />
+                </motion.div>
+              ))
             ) : !loading ? (
               <div className="col-span-2 lg:col-span-3">
-                <EmptyState 
-                  searchQuery={searchQuery} 
-                  onClearSearch={handleClearSearch} 
+                <EmptyState
+                  searchQuery={searchQuery}
+                  onClearSearch={handleClearSearch}
                 />
               </div>
             ) : null}

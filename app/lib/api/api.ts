@@ -57,7 +57,6 @@ export const fetchPost = async (id: string): Promise<ApiResponse<PostResponse>> 
 
 export const fetchPostBySlug = async (slug: string): Promise<ApiResponse<PostResponse>> => {
   const response = await fetch(`/api/posts/${slug}`);
-  console.log('fetchPostBySlug response:', response);
   return handleApiResponse<PostResponse>(response);
 };
 

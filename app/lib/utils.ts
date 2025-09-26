@@ -72,7 +72,7 @@ export async function parseJsonRequest(request: Request) {
   try {
     return await request.json();
   } catch (error) {
-    console.log('JSON parse error:', error);
+    console.error('JSON parse error:', error);
     return apiErrorResponse(
       'Invalid request',
       'Malformed JSON received',

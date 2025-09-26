@@ -23,7 +23,6 @@ export async function verifyTokenForMiddleware(token: string) {
 
 export async function getCurrentUserForMiddleware(req: NextRequest) {
   const token = req.cookies.get('token')?.value;
-  console.log('Token from cookies:', token);
   
   if (!token) {
     return null;
@@ -34,11 +33,10 @@ export async function getCurrentUserForMiddleware(req: NextRequest) {
     return decoded;
   } catch (error: unknown) {
     if (error instanceof Error) {
-        console.log('Token verification failed:', error.message);
+        console.error('Token verification failed:', error.message);
     } else {
-        console.log('Token verification failed: Unknown error');
+        console.error('Token verification failed: Unknown error');
     }
-    
     return null;
   }
 }

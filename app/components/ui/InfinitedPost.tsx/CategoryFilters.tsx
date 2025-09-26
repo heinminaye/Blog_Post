@@ -69,7 +69,7 @@ export default function CategoryFilters({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="mb-4 lg:mb-10"
+      className=""
     >
       <div className="w-full relative">
         {/* Darker fade effects for better visibility */}

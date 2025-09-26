@@ -76,7 +76,6 @@ export default function PostCard({ post, hasToken, user, onPostDelete }: PostCar
 
   return (
     <article className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg transition-all duration-300 overflow-hidden group border border-gray-200 dark:border-gray-700 hover:ring-2 hover:ring-purple-500/30 hover:border-purple-500/50 transform hover:-translate-y-1">
-      
       {/* Elegant Three-Dot Menu */}
       {hasToken && (
         <div className="absolute top-3.5 right-3.5 z-20" ref={menuRef}>

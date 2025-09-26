@@ -103,7 +103,7 @@ const Navigation = forwardRef<HTMLInputElement, NavigationProps>(
                       >
                         <FiX className="h-4 w-4" />
                         {/* Tooltip for clear search */}
-                        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                        <div className="absolute -bottom-8 right-0 transform bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                           Clear search
                         </div>
                       </button>
@@ -134,7 +134,7 @@ const Navigation = forwardRef<HTMLInputElement, NavigationProps>(
                     >
                       <FiX className="h-4 w-4" />
                       {/* Tooltip for clear search */}
-                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                      <div className="absolute -bottom-8 right-0 transform  bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                         Clear search
                       </div>
                     </button>
@@ -175,7 +175,7 @@ const Navigation = forwardRef<HTMLInputElement, NavigationProps>(
                   <FiLogOut className="h-3.5 w-3.5 mr-1.5" />
                   <span>Logout</span>
                   {/* Tooltip for logout */}
-                  <div className="absolute sm:hidden block -bottom-9 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                  <div className="absolute sm:hidden block -bottom-9 right-0 transform bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                     Sign out
                   </div>
                 </button>
@@ -230,7 +230,7 @@ const Navigation = forwardRef<HTMLInputElement, NavigationProps>(
                 >
                   <FiSearch className="h-4 w-4" />
                   {/* Tooltip for search */}
-                  <div className="absolute -bottom-9 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                  <div className="absolute -bottom-9 right-0 transform bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                     Search articles
                   </div>
                 </button>
