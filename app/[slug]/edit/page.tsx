@@ -8,7 +8,7 @@ import PostEditor from "@/components/admin/PostEditor";
 import { fetchPostBySlug } from "@/lib/api/api";
 
 export default function EditPostPage() {
-  const { slug } = useParams(); // Get slug from the URL
+  const { slug } = useParams();
   const router = useRouter();
   const [post, setPost] = useState<PostResponse | null>(null);
   const [loading, setLoading] = useState(true);
