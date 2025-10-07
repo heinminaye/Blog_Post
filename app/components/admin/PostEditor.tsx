@@ -10,7 +10,7 @@ import {
   PostResponse,
 } from "@/types/post";
 import { deleteImage, uploadImage } from "@/lib/uiUtils";
-import { FaRegSave } from "react-icons/fa";
+import { FaRegSave, FaGripVertical } from "react-icons/fa";
 import { generateSlug } from "@/lib/utils";
 import tagsData from "@/data/tags.json";
 
@@ -39,12 +39,23 @@ const TITLE_MAX_LENGTH = 120;
 const EXCERPT_MAX_LENGTH = 300;
 const TAG_MAX_LENGTH = 25;
 
+// Generate unique ID for blocks
+const generateBlockId = () => `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+// Add id to ContentBlockInput type if needed, or use a wrapper
+interface BlockWithId extends ContentBlockInput {
+  id: string;
+}
+
 export default function PostEditor({ initialPost }: PostEditorProps) {
   const [title, setTitle] = useState(initialPost?.title || "");
   const [slug, setSlug] = useState(initialPost?.slug || "");
   const [excerpt, setExcerpt] = useState(initialPost?.excerpt || "");
-  const [blocks, setBlocks] = useState<ContentBlockInput[]>(
-    initialPost?.content || []
+  const [blocks, setBlocks] = useState<BlockWithId[]>(
+    initialPost?.content?.map(block => ({
+      ...block,
+      id: generateBlockId()
+    })) || []
   );
   const [coverImage, setCoverImage] = useState(initialPost?.coverImage || "");
   const [tags, setTags] = useState<string[]>(initialPost?.tags || []);
@@ -54,6 +65,8 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
   );
   const [showTagSelector, setShowTagSelector] = useState(false);
   const [tagSearch, setTagSearch] = useState("");
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const router = useRouter();
   const titleRef = useRef<HTMLTextAreaElement>(null);
@@ -94,6 +107,49 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Enhanced Drag and Drop Handlers
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (dropIndex: number) => {
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    const newBlocks = [...blocks];
+    const [movedBlock] = newBlocks.splice(draggedIndex, 1);
+    newBlocks.splice(dropIndex, 0, movedBlock);
+    
+    setBlocks(newBlocks);
+    
+    if (focusedBlockIndex === draggedIndex) {
+      setFocusedBlockIndex(dropIndex);
+    } else if (focusedBlockIndex !== null) {
+      if (draggedIndex < focusedBlockIndex && dropIndex >= focusedBlockIndex) {
+        setFocusedBlockIndex(focusedBlockIndex - 1);
+      } else if (draggedIndex > focusedBlockIndex && dropIndex <= focusedBlockIndex) {
+        setFocusedBlockIndex(focusedBlockIndex + 1);
+      }
+    }
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   const handleTitleChange = (value: string) => {
     if (value.length <= TITLE_MAX_LENGTH) {
       setTitle(value);
@@ -111,9 +167,10 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
   };
 
   const addBlock = (type: ContentBlockType, index?: number) => {
-    const newBlock: ContentBlockInput = {
+    const newBlock: BlockWithId = {
       type,
       content: type !== "divider" ? "" : undefined,
+      id: generateBlockId()
     };
 
     if (type === "image") {
@@ -146,9 +203,36 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
     if (blocks.length <= 0) return;
     setBlocks(blocks.filter((_, i) => i !== index));
 
-    // Set focus to the previous block if available
     if (focusedBlockIndex === index) {
       setFocusedBlockIndex(Math.max(0, index - 1));
+    }
+  };
+
+  const moveBlockUp = (index: number) => {
+    if (index <= 0) return;
+    
+    const newBlocks = [...blocks];
+    const block = newBlocks[index];
+    newBlocks.splice(index, 1);
+    newBlocks.splice(index - 1, 0, block);
+    setBlocks(newBlocks);
+    
+    if (focusedBlockIndex === index) {
+      setFocusedBlockIndex(index - 1);
+    }
+  };
+
+  const moveBlockDown = (index: number) => {
+    if (index >= blocks.length - 1) return;
+    
+    const newBlocks = [...blocks];
+    const block = newBlocks[index];
+    newBlocks.splice(index, 1);
+    newBlocks.splice(index + 1, 0, block);
+    setBlocks(newBlocks);
+    
+    if (focusedBlockIndex === index) {
+      setFocusedBlockIndex(index + 1);
     }
   };
 
@@ -194,7 +278,7 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
       }
       setTags([...tags, tag]);
     }
-    setTagSearch(""); // Clear search after selecting a tag
+    setTagSearch("");
   };
 
   const removeTag = (tag: string) => {
@@ -251,6 +335,8 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
       const method = initialPost ? "PUT" : "POST";
       const url = initialPost ? `/api/posts/${initialPost._id}` : "/api/posts";
 
+      const contentWithoutIds = blocks.map(({ id, ...block }) => block);
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -258,7 +344,7 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
           title,
           slug,
           excerpt,
-          content: blocks,
+          content: contentWithoutIds,
           coverImage: coverImage || undefined,
           tags: tags.map((tag) => tag.toLowerCase().slice(0, TAG_MAX_LENGTH)),
           published: publish,
@@ -283,14 +369,128 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
     }
   };
 
-  const renderBlock = (block: ContentBlockInput, index: number) => {
+  const renderBlock = (block: BlockWithId, index: number) => {
+    const isDragged = draggedIndex === index;
+    const isDragOver = dragOverIndex === index;
+
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ 
+          opacity: isDragged ? 0.7 : 1, 
+          y: 0,
+        }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ 
+          type: "spring",
+          stiffness: 400,
+          damping: 35,
+          duration: 0.15
+        }}
+        className={`relative group/block rounded-xl transition-all duration-200 ${
+          isDragOver 
+            ? 'ring-2 ring-purple-400 bg-purple-500/10 shadow-lg shadow-purple-500/10 border border-purple-400/30' 
+            : 'border border-transparent'
+        } ${
+          isDragged 
+            ? 'cursor-grabbing z-50 shadow-2xl shadow-purple-500/20 bg-gray-800/80 backdrop-blur-sm' 
+            : ''
+        }`}
+      >
+        {/* Enhanced Sidebar with Drag Handle */}
+        <div className="hidden absolute -left-16 top-0 xl:flex flex-col items-center pt-4 opacity-0 group-hover/block:opacity-100 transition-all duration-300">
+          {/* Main Drag Handle */}
+          <motion.div
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2.5 text-gray-400 hover:text-purple-300 hover:bg-purple-500/20 rounded-xl transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-sm border border-gray-600/30 shadow-lg mb-2"
+            draggable
+            onDragStart={() => handleDragStart(index)}
+            onDragEnd={handleDragEnd}
+            title="Drag to reorder"
+          >
+            <FaGripVertical className="h-4 w-4" />
+          </motion.div>
+          
+          {/* Enhanced Move Up/Down Buttons */}
+          {blocks.length > 1 && (
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex flex-col gap-1.5 bg-gray-800/90 rounded-xl p-2 backdrop-blur-md border border-gray-600/50 shadow-xl"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
+                whileTap={{ scale: 0.95 }}
+                type="button"
+                onClick={() => moveBlockUp(index)}
+                disabled={index === 0}
+                className="p-2 text-gray-400 hover:text-purple-300 hover:bg-purple-500/20 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 border border-gray-600/30"
+                title="Move up"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
+                whileTap={{ scale: 0.95 }}
+                type="button"
+                onClick={() => moveBlockDown(index)}
+                disabled={index === blocks.length - 1}
+                className="p-2 text-gray-400 hover:text-purple-300 hover:bg-purple-500/20 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 border border-gray-600/30"
+                title="Move down"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </motion.button>
+            </motion.div>
+          )}
+        </div>
+
+        {/* Block Content Container */}
+        <motion.div 
+          className={`transition-all relative duration-200 ${
+            isDragged 
+              ? 'opacity-80 blur-[1px] scale-105' 
+              : 'opacity-100 blur-0 scale-100'
+          }`}
+          draggable
+          onDragStart={() => handleDragStart(index)}
+          onDragOver={(e) => handleDragOver(e, index)}
+          onDragLeave={handleDragLeave}
+          onDrop={() => handleDrop(index)}
+          onDragEnd={handleDragEnd}
+        >
+          {renderBlockContent(block, index)}
+        </motion.div>
+
+        {/* Enhanced Drop Indicator */}
+        {isDragOver && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="absolute inset-0 rounded-xl pointer-events-none z-10"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border-2 border-dashed border-purple-400"></div>
+            
+          </motion.div>
+        )}
+      </motion.div>
+    );
+  };
+
+  const renderBlockContent = (block: BlockWithId, index: number) => {
     switch (block.type) {
       case "paragraph":
       case "heading":
       case "quote":
         return (
           <TextBlock
-            key={index}
+            key={block.id}
             block={block}
             onChange={(updates) => updateBlock(index, updates)}
             onRemove={() => removeBlock(index)}
@@ -302,7 +502,7 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
       case "image":
         return (
           <ImageBlock
-            key={index}
+            key={block.id}
             block={block}
             onChange={(updates) => updateBlock(index, updates)}
             onRemove={() => removeBlock(index)}
@@ -314,7 +514,7 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
       case "embed":
         return (
           <VideoBlock
-            key={index}
+            key={block.id}
             block={block}
             onChange={(updates) => updateBlock(index, updates)}
             onRemove={() => removeBlock(index)}
@@ -323,14 +523,19 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
       case "code":
         return (
           <CodeBlock
-            key={index}
+            key={block.id}
             block={block}
             onChange={(updates) => updateBlock(index, updates)}
             onRemove={() => removeBlock(index)}
           />
         );
       case "divider":
-        return <DividerBlock key={index} onRemove={() => removeBlock(index)} />;
+        return (
+          <DividerBlock 
+            key={block.id}
+            onRemove={() => removeBlock(index)} 
+          />
+        );
       default:
         return null;
     }
@@ -355,13 +560,11 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
                 className="p-1.5 rounded-md text-gray-200 hover:text-white hover:bg-gray-800 focus:outline-none mr-2 transition-colors group relative"
               >
                 <FiArrowLeft className="h-4.5 w-4.5" />
-                {/* Tooltip */}
                 <div className="absolute -bottom-8 left-0 transform bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                   Go back
                 </div>
               </button>
 
-              {/* Title and subtitle */}
               <div>
                 <h1 className="text-base sm:text-lg font-semibold text-white">
                   {initialPost ? "Edit Post" : "Create Post"}
@@ -382,27 +585,21 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
               >
                 <FaRegSave className="h-3.5 w-3.5 mr-1.5 opacity-60" />
                 <span>Save Draft</span>
-
-                {/* Coming Soon Badge */}
                 <span className="ml-2 text-[10px] uppercase tracking-wide bg-yellow-500/90 text-black px-1.5 py-0.5 rounded-sm">
                   Coming Soon
                 </span>
               </button>
 
-              {/* Save Draft - Mobile (Coming Soon) */}
               <button
                 disabled
                 className="sm:hidden p-2 bg-gray-700 cursor-not-allowed rounded-md text-gray-400 border border-gray-600/50 relative group"
               >
                 <FiSave className="h-4 w-4 opacity-60" />
-
-                {/* Tooltip */}
                 <div className="absolute -bottom-9 left-0 transform -translate-x-1/2 bg-black/80 text-yellow-300 text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                   Save Draft (Coming Soon)
                 </div>
               </button>
 
-              {/* Publish - Desktop */}
               <button
                 onClick={() => handleSubmit(true)}
                 disabled={isSubmitting}
@@ -412,18 +609,13 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
                 <span>{isSubmitting ? "Publishing..." : "Publish"}</span>
               </button>
 
-              {/* Publish - Mobile */}
               <button
                 onClick={() => handleSubmit(true)}
                 disabled={isSubmitting}
                 className="sm:hidden p-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 rounded-md text-white transition-all duration-150 border border-purple-500/30 shadow-lg hover:shadow-purple-500/20 group relative"
               >
                 <FiGlobe className="h-4 w-4" />
-                <div
-                  className="absolute -bottom-9 right-0 transform 
-  bg-black/80 text-white text-xs py-1 px-2 rounded-md 
-  opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap"
-                >
+                <div className="absolute -bottom-9 right-0 transform bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                   Publish post
                 </div>
               </button>
@@ -431,12 +623,13 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
           </div>
         </div>
       </nav>
+      
       {/* Editor content */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="space-y-6 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+        className="space-y-6 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
       >
         {/* Cover Image */}
         <CoverImageUpload
@@ -490,9 +683,8 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
           </div>
         </div>
 
-        {/* Tags - Enhanced UI */}
+        {/* Tags */}
         <div className="relative" ref={tagSelectorRef}>
-          {/* Combined input and selected tags */}
           <div
             className={`w-full min-h-12 bg-gray-800/50 border border-gray-700 ${
               showTagSelector
@@ -501,7 +693,6 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
             } rounded-lg px-3 py-2 flex flex-wrap gap-2 cursor-text transition-colors`}
             onClick={() => setShowTagSelector(true)}
           >
-            {/* Selected tags inside the input */}
             {tags.map((tag) => (
               <span
                 key={tag}
@@ -519,8 +710,6 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
                 </button>
               </span>
             ))}
-
-            {/* Search input inside the container */}
             <input
               type="text"
               value={tagSearch}
@@ -531,7 +720,6 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
             />
           </div>
 
-          {/* Tag selector dropdown */}
           <AnimatePresence>
             {showTagSelector && (
               <motion.div
@@ -541,7 +729,6 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
                 transition={{ duration: 0.2 }}
                 className="relative bottom-0 z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col"
               >
-                {/* Search header - fixed at top */}
                 <div className="sticky top-0 bg-gray-800 p-2 border-b border-gray-700 flex-shrink-0">
                   <div className="relative flex-1">
                     <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -564,7 +751,6 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
                   </div>
                 </div>
 
-                {/* Tag list - scrollable area */}
                 <div className="flex-1 overflow-y-auto">
                   <div className="p-2">
                     {filteredTags.length > 0 ? (
@@ -597,13 +783,15 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
           </AnimatePresence>
         </div>
 
-        {/* Content Blocks */}
-        <div className="space-y-2">
-          {blocks.map((block, index) => (
-            <div key={index} className="relative">
-              {renderBlock(block, index)}
-            </div>
-          ))}
+        {/* Content Blocks with Enhanced Sidebar Drag & Drop */}
+        <div className="space-y-8">
+          <AnimatePresence>
+            {blocks.map((block, index) => (
+              <div key={block.id}>
+                {renderBlock(block, index)}
+              </div>
+            ))}
+          </AnimatePresence>
         </div>
 
         {/* Add block button at the end */}

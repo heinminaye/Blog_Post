@@ -21,7 +21,7 @@ import {
   FaYoutube,
   FaQuestionCircle,
 } from "react-icons/fa";
-import { FiArrowLeft, FiEdit3, FiTrash2 } from "react-icons/fi";
+import { FiArrowLeft, FiEdit3, FiTrash2, FiShare2 } from "react-icons/fi";
 import {
   SiJavascript,
   SiTypescript,
@@ -42,8 +42,20 @@ export default function PostDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const deleteConfirmRef = useRef<HTMLDivElement>(null);
   const [copiedStates, setCopiedStates] = useState<Record<number, boolean>>({});
+  const [isSharing, setIsSharing] = useState(false);
+  const deleteConfirmRef = useRef<HTMLDivElement>(null);
+
+  // Process text content to handle basic HTML tags
+  const processTextContent = (text: string) => {
+    if (!text) return "";
+    
+    return text
+      .replace(/<b>(.*?)<\/b>/g, '<strong class="font-bold">$1</strong>')
+      .replace(/<i>(.*?)<\/i>/g, '<em class="italic">$1</em>')
+      .replace(/<code>(.*?)<\/code>/g, '<code class="bg-gray-700 px-1.5 py-0.5 rounded text-sm font-mono text-green-300">$1</code>')
+      .replace(/<br\s*\/?>/g, '<br />');
+  };
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -140,8 +152,40 @@ export default function PostDetailPage() {
   };
 
   const handleCopyCode = async (codeContent: string, blockIndex: number) => {
-    await navigator.clipboard.writeText(codeContent || "");
-    setCopied(blockIndex);
+    try {
+      await navigator.clipboard.writeText(codeContent || "");
+      setCopied(blockIndex);
+      toast.success("Code copied to clipboard!");
+    } catch (error) {
+      toast.error("Failed to copy code");
+    }
+  };
+
+  const handleShare = async () => {
+    if (!post) return;
+
+    setIsSharing(true);
+    try {
+      const shareData = {
+        title: post.title,
+        text: post.excerpt || post.title,
+        url: window.location.href,
+      };
+
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success("Link copied to clipboard!");
+      }
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   const handleDeleteClick = () => {
@@ -180,7 +224,7 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center overflow-x-hidden">
         <LoadingDots />
       </div>
     );
@@ -195,20 +239,7 @@ export default function PostDetailPage() {
               href="/"
               className="inline-flex items-center text-pink-300 hover:text-pink-100 transition-colors text-sm group"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-1 group-hover:-translate-x-1 transition-transform"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
+              <FiArrowLeft className="h-4 w-4 mr-1 group-hover:-translate-x-1 transition-transform" />
               Back to Posts
             </Link>
           </nav>
@@ -218,8 +249,8 @@ export default function PostDetailPage() {
             <h2 className="text-2xl font-bold text-white mb-4">
               Something went wrong
             </h2>
-            <p className="text-gray-400 mb-6">{error}</p>
-            <div className="flex gap-4 justify-center">
+            <p className="text-gray-400 mb-6 max-w-md mx-auto">{error}</p>
+            <div className="flex gap-4 justify-center flex-wrap">
               <button
                 onClick={handleRetry}
                 className="px-6 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition-colors"
@@ -248,20 +279,7 @@ export default function PostDetailPage() {
               href="/"
               className="inline-flex items-center text-pink-300 hover:text-pink-100 transition-colors text-sm group"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4 mr-1 group-hover:-translate-x-1 transition-transform"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
+              <FiArrowLeft className="h-4 w-4 mr-1 group-hover:-translate-x-1 transition-transform" />
               Back to Posts
             </Link>
           </nav>
@@ -272,7 +290,7 @@ export default function PostDetailPage() {
               Post Not Found
             </h2>
             <p className="text-gray-400 mb-6">
-              {`The post you're looking for doesn't exist.`}
+              {`The post you're looking for doesn't exist or may have been removed.`}
             </p>
             <button
               onClick={() => router.push("/")}
@@ -294,42 +312,49 @@ export default function PostDetailPage() {
       id: "javascript",
       name: "JavaScript",
       icon: <SiJavascript size={16} className="text-yellow-400" />,
+      color: "text-yellow-400"
     },
     {
       id: "typescript",
       name: "TypeScript",
       icon: <SiTypescript size={16} className="text-blue-500" />,
+      color: "text-blue-500"
     },
     {
       id: "python",
       name: "Python",
       icon: <SiPython size={16} className="text-blue-400" />,
+      color: "text-blue-400"
     },
     {
       id: "java",
       name: "Java",
       icon: <FaJava size={16} className="text-red-500" />,
+      color: "text-red-500"
     },
     {
       id: "html",
       name: "HTML",
       icon: <SiHtml5 size={16} className="text-orange-500" />,
+      color: "text-orange-500"
     },
     {
       id: "css",
       name: "CSS",
       icon: <SiCss3 size={16} className="text-blue-600" />,
+      color: "text-blue-600"
     },
     {
       id: "sql",
       name: "SQL",
       icon: <SiMysql size={16} className="text-blue-700" />,
+      color: "text-blue-700"
     },
   ];
 
   return (
     <article className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
-      {/* Delete Confirmation Modal - Using your design */}
+      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div
@@ -393,8 +418,8 @@ export default function PostDetailPage() {
                 </div>
               </button>
 
-              <div>
-                <h1 className="text-base sm:text-lg font-semibold text-white">
+              <div className="max-w-[200px] sm:max-w-none truncate">
+                <h1 className="text-base sm:text-lg font-semibold text-white truncate">
                   {post.title}
                 </h1>
                 <p className="hidden sm:block text-xs text-gray-400">
@@ -405,6 +430,22 @@ export default function PostDetailPage() {
 
             {/* Right section with action buttons */}
             <div className="flex items-center space-x-2">
+              {/* Share Button */}
+              <button
+                onClick={handleShare}
+                disabled={isSharing}
+                className="p-2 bg-gray-800 hover:bg-gray-700 rounded-md text-gray-300 transition-colors border border-gray-700/30 group relative"
+              >
+                {isSharing ? (
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <FiShare2 className="h-4 w-4" />
+                )}
+                <div className="absolute -bottom-9 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                  Share post
+                </div>
+              </button>
+
               {/* Edit - Desktop */}
               {isAuthor && (
                 <Link
@@ -473,14 +514,14 @@ export default function PostDetailPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8 bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900/30 rounded-2xl p-4 border border-gray-700/50"
+          className="mb-8 bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900/30 rounded-2xl p-6 border border-gray-700/50"
         >
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-tight">
             {post.title}
           </h1>
 
           {post.excerpt && (
-            <p className="text-md text-gray-300 mb-4 leading-relaxed">
+            <p className="text-lg text-gray-300 mb-6 leading-relaxed">
               {post.excerpt}
             </p>
           )}
@@ -503,7 +544,7 @@ export default function PostDetailPage() {
             {/* Author info */}
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm shadow-lg shadow-pink-500/20">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm shadow-lg shadow-pink-500/20">
                   {post.author.name
                     ? post.author.name.charAt(0).toUpperCase()
                     : post.author.email?.charAt(0).toUpperCase()}
@@ -528,6 +569,9 @@ export default function PostDetailPage() {
               <div>
                 <p className="text-sm font-semibold text-pink-100">
                   {post.author.name || post.author.email?.split("@")[0]}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {post.author.email}
                 </p>
               </div>
             </div>
@@ -554,7 +598,7 @@ export default function PostDetailPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="relative w-full h-64 md:h-96 mb-8 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-500/10 to-purple-600/10"
+            className="relative w-full h-64 md:h-96 mb-8 rounded-2xl overflow-hidden bg-gradient-to-br from-pink-500/10 to-purple-600/10 border border-gray-700/50"
           >
             <Image
               src={post.coverImage}
@@ -562,8 +606,9 @@ export default function PostDetailPage() {
               fill
               className="object-cover"
               priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent"></div>
           </motion.div>
         )}
 
@@ -572,32 +617,34 @@ export default function PostDetailPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900/20 rounded-2xl p-4 border border-gray-700/50"
+          className="prose prose-lg prose-invert max-w-none bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900/20 rounded-2xl p-6 border border-gray-700/50"
         >
           {post.content.map((block, index) => {
             switch (block.type) {
               case "paragraph":
                 return (
-                  <p
+                  <div
                     key={index}
-                    className="text-md leading-relaxed mb-6 text-gray-200"
-                  >
-                    {block.content}
-                  </p>
+                    className="text-lg leading-relaxed mb-6 text-gray-200"
+                    dangerouslySetInnerHTML={{ 
+                      __html: processTextContent(block.content || "") 
+                    }}
+                  />
                 );
               case "heading":
                 return (
                   <h2
                     key={index}
                     className="text-2xl font-bold my-8 text-white"
-                  >
-                    {block.content}
-                  </h2>
+                    dangerouslySetInnerHTML={{ 
+                      __html: processTextContent(block.content || "") 
+                    }}
+                  />
                 );
               case "image":
                 return (
                   <figure key={index} className="my-8">
-                    <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100">
+                    <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 border border-gray-700">
                       <Image
                         src={block.url || ""}
                         alt={block.altText || ""}
@@ -608,52 +655,50 @@ export default function PostDetailPage() {
                       />
                     </div>
                     {block.caption && (
-                      <figcaption className="text-center text-sm text-gray-500 mt-2">
+                      <figcaption className="text-center text-sm text-gray-400 mt-3 italic">
                         {block.caption}
                       </figcaption>
                     )}
                   </figure>
                 );
               case "code":
-                const languageIcon = languageOptions.find(
+                const languageData = languageOptions.find(
                   (lang) => lang.id === block.language
-                )?.icon || (
-                  <SiJavascript size={16} className="text-yellow-400" />
-                );
+                ) || languageOptions[0];
 
                 return (
-                  <div key={index} className="my-4 bg-gray-800/30 rounded-xl ">
-                    <div className="bg-gray-900 rounded-lg p-4 border border-gray-700 shadow-inner relative group/code">
-                      <div className="flex justify-between items-center mb-2 text-xs text-gray-500 font-mono">
-                        <span className="flex items-center justify-center gap-2">
-                          {languageIcon}
-                          <span>{block.language || "javascript"}</span>
+                  <div key={index} className="my-6 bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700">
+                    <div className="bg-gray-900 p-4 border-b border-gray-700 flex justify-between items-center">
+                      <div className="flex items-center gap-2 text-sm font-mono text-gray-300">
+                        {languageData.icon}
+                        <span className={languageData.color}>
+                          {block.language || "javascript"}
                         </span>
-                        <button
-                          onClick={() =>
-                            handleCopyCode(block.content || "", index)
-                          }
-                          className="px-2 py-1 bg-gray-800 rounded-md hover:bg-gray-700 transition-colors flex items-center gap-1 text-gray-300 hover:text-white border border-gray-700 text-xs min-w-[65px]"
-                        >
-                          {copiedStates[index] ? (
-                            <>
-                              <FaCheck className="text-green-400" size={12} />
-                              <span>Copied!</span>
-                            </>
-                          ) : (
-                            <>
-                              <FaCopy size={12} />
-                              <span>Copy</span>
-                            </>
-                          )}
-                        </button>
                       </div>
+                      <button
+                        onClick={() =>
+                          handleCopyCode(block.content || "", index)
+                        }
+                        className="px-3 py-1.5 bg-gray-800 rounded-md hover:bg-gray-700 transition-colors flex items-center gap-2 text-gray-300 hover:text-white border border-gray-600 text-xs font-medium"
+                      >
+                        {copiedStates[index] ? (
+                          <>
+                            <FaCheck className="text-green-400" size={12} />
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaCopy size={12} />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
 
-                      <div className="relative">
-                        <pre className="overflow-x-auto text-sm text-gray-100 font-mono whitespace-pre-wrap">
-                          <code>{block.content || ""}</code>
-                        </pre>
-                      </div>
+                    <div className="p-4 bg-gray-900/50">
+                      <pre className="overflow-x-auto text-sm text-gray-100 font-mono whitespace-pre-wrap leading-relaxed">
+                        <code>{block.content || ""}</code>
+                      </pre>
                     </div>
                   </div>
                 );
@@ -700,7 +745,7 @@ export default function PostDetailPage() {
                 const embedUrl = getEmbedUrl();
 
                 return (
-                  <div key={index} className="">
+                  <div key={index} className="my-6">
                     {embedUrl ? (
                       <div className="relative rounded-xl overflow-hidden bg-black border border-gray-700 shadow-lg">
                         <div className="relative w-full h-0 pb-[56.25%]">
@@ -723,11 +768,13 @@ export default function PostDetailPage() {
                         </div>
                       </div>
                     ) : (
-                      <p className="text-red-400 text-sm">Invalid embed URL</p>
+                      <div className="text-red-400 text-sm p-4 bg-red-400/10 rounded-lg border border-red-400/20">
+                        Invalid embed URL
+                      </div>
                     )}
 
                     {block.caption && (
-                      <p className="text-center text-sm text-gray-500 mt-2">
+                      <p className="text-center text-sm text-gray-400 mt-3 italic">
                         {block.caption}
                       </p>
                     )}
@@ -738,14 +785,17 @@ export default function PostDetailPage() {
                 return (
                   <blockquote
                     key={index}
-                    className="my-8 pl-8 pr-4 py-2 relative border-l-4 border-purple-500 bg-gray-800/30 rounded-r-lg"
+                    className="my-8 pl-8 pr-4 py-4 relative border-l-4 border-purple-500 bg-gray-800/30 rounded-r-lg"
                   >
-                    <div className="absolute top-2 left-2 text-purple-500">
-                      <FaQuoteLeft size={16} />
+                    <div className="absolute top-4 left-3 text-purple-500">
+                      <FaQuoteLeft size={20} />
                     </div>
-                    <p className="text-lg italic text-gray-300 leading-relaxed">
-                      {block.content}
-                    </p>
+                    <p 
+                      className="text-xl italic text-gray-300 pl-3 leading-relaxed"
+                      dangerouslySetInnerHTML={{ 
+                        __html: processTextContent(block.content || "") 
+                      }}
+                    />
                   </blockquote>
                 );
               case "divider":
@@ -753,7 +803,7 @@ export default function PostDetailPage() {
                   <div key={index} className="my-8 group">
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-600 group-hover:border-purple-500/50 transition-colors duration-300 " />
+                        <div className="w-full border-t border-gray-600 group-hover:border-purple-500/50 transition-colors duration-300" />
                       </div>
 
                       <div className="relative flex justify-center">
@@ -773,8 +823,26 @@ export default function PostDetailPage() {
             }
           })}
         </motion.div>
+
+        {/* Article Footer */}
+        <motion.footer
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-8 text-center text-gray-400 text-sm"
+        >
+          <p>Thanks for reading! If you enjoyed this post, please share it with others.</p>
+          <div className="mt-4 flex justify-center gap-4">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              <FiShare2 className="h-4 w-4" />
+              Share this post
+            </button>
+          </div>
+        </motion.footer>
       </div>
     </article>
   );
 }
-
