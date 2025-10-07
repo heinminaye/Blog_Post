@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📝 Blog Post – Full Stack Next.js Blogging Platform
 
-## Getting Started
+A modern **full-stack blogging platform** built entirely with **Next.js**.  
+It features **secure cookie-based admin authentication**, **Cloudinary image uploads**, and **Framer Motion animations** — all styled with **Tailwind CSS**.  
+Admins can log in through a protected dashboard to create and manage blog posts, while users enjoy a fast, responsive, and SEO-friendly blog experience.
 
-First, run the development server:
+🔗 **Live Demo:** [https://blog-post-xi-eosin.vercel.app/](https://blog-post-xi-eosin.vercel.app/)
+
+---
+
+## 🚀 Features
+
+- 🔐 **Admin Authentication (HTTP-only Cookies)**  
+  - Only admins can log in and manage posts.  
+  - Authentication is handled with **secure HTTP-only cookies**, preventing client-side access and XSS attacks.  
+  - Protected routes ensure only authorized admins can access the dashboard.  
+  - Admin login page: `/admin/login`
+
+- 🌄 **Image Uploads via Cloudinary**  
+  - Integrated with **Cloudinary** for seamless image uploading and optimization.  
+  - Automatically handles image storage, compression, and CDN delivery.
+
+- 🧠 **Full Stack in One App**  
+  - Uses **Next.js API routes** for backend logic, authentication, and uploads.  
+  - Data managed with **MongoDB (Mongoose)**.  
+  - Includes a seeding script to create an admin user securely.
+
+- 🖼️ **Framer Motion Animations**  
+  - Adds fluid transitions and modern motion effects to improve UX.
+
+- 🗂️ **Dynamic Routing & SEO**  
+  - Each blog post has a unique, SEO-friendly URL and meta tags.
+
+- 📱 **Responsive Design**  
+  - Built with **Tailwind CSS**, ensuring full mobile and desktop compatibility.
+
+- ☁️ **Deployed on Vercel**  
+  - Fast, scalable, and globally distributed hosting.
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technologies |
+|-----------|---------------|
+| Framework | Next.js 14 (App Router) |
+| Styling | Tailwind CSS |
+| Animation | Framer Motion |
+| Database | MongoDB (Mongoose) |
+| Authentication | Cookie-based (HTTP-only secure sessions) |
+| Image Hosting | Cloudinary |
+| Deployment | Vercel |
+| Tools | Git, GitHub, ESLint, Prettier |
+
+---
+
+## ⚙️ Installation
 
 ```bash
+# 1. Clone this repository
+git clone https://github.com/heinminaye/blog_post.git
+cd blog_post
+
+# 2. Install dependencies
+npm install
+
+# 3. Add environment variables
+# Create a file named .env.local and add:
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+CLOUDINARY_URL=your_cloudinary_url
+ADMIN_EMAIL=your_admin_email
+ADMIN_PASSWORD=your_admin_password
+
+# 4. Seed the admin user
+npm run seed:admin
+
+# 5. Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
