@@ -370,118 +370,84 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
   };
 
   const renderBlock = (block: BlockWithId, index: number) => {
-    const isDragged = draggedIndex === index;
-    const isDragOver = dragOverIndex === index;
+  const isDragged = draggedIndex === index;
+  const isDragOver = dragOverIndex === index;
+  const isFocused = focusedBlockIndex === index;
 
-    return (
-      <motion.div
-        layout
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ 
-          opacity: isDragged ? 0.7 : 1, 
-          y: 0,
-        }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ 
-          type: "spring",
-          stiffness: 400,
-          damping: 35,
-          duration: 0.15
-        }}
-        className={`relative group/block rounded-xl transition-all duration-200 ${
-          isDragOver 
-            ? 'ring-2 ring-purple-400 bg-purple-500/10 shadow-lg shadow-purple-500/10 border border-purple-400/30' 
-            : 'border border-transparent'
-        } ${
-          isDragged 
-            ? 'cursor-grabbing z-50 shadow-2xl shadow-purple-500/20 bg-gray-800/80 backdrop-blur-sm' 
-            : ''
-        }`}
-      >
-        {/* Enhanced Sidebar with Drag Handle */}
-        <div className="hidden absolute -left-16 top-0 xl:flex flex-col items-center pt-4 opacity-0 group-hover/block:opacity-100 transition-all duration-300">
-          {/* Main Drag Handle */}
-          <motion.div
-            whileHover={{ scale: 1.1, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
-            whileTap={{ scale: 0.95 }}
-            className="p-2.5 text-gray-400 hover:text-purple-300 hover:bg-purple-500/20 rounded-xl transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-sm border border-gray-600/30 shadow-lg mb-2"
-            draggable
-            onDragStart={() => handleDragStart(index)}
-            onDragEnd={handleDragEnd}
-            title="Drag to reorder"
-          >
-            <FaGripVertical className="h-4 w-4" />
-          </motion.div>
-          
-          {/* Enhanced Move Up/Down Buttons */}
-          {blocks.length > 1 && (
-            <motion.div 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex flex-col gap-1.5 bg-gray-800/90 rounded-xl p-2 backdrop-blur-md border border-gray-600/50 shadow-xl"
-            >
-              <motion.button
-                whileHover={{ scale: 1.05, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
-                whileTap={{ scale: 0.95 }}
-                type="button"
-                onClick={() => moveBlockUp(index)}
-                disabled={index === 0}
-                className="p-2 text-gray-400 hover:text-purple-300 hover:bg-purple-500/20 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 border border-gray-600/30"
-                title="Move up"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                </svg>
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
-                whileTap={{ scale: 0.95 }}
-                type="button"
-                onClick={() => moveBlockDown(index)}
-                disabled={index === blocks.length - 1}
-                className="p-2 text-gray-400 hover:text-purple-300 hover:bg-purple-500/20 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 border border-gray-600/30"
-                title="Move down"
-              >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </motion.button>
-            </motion.div>
-          )}
-        </div>
-
-        {/* Block Content Container */}
-        <motion.div 
-          className={`transition-all relative duration-200 ${
-            isDragged 
-              ? 'opacity-80 blur-[1px] scale-105' 
-              : 'opacity-100 blur-0 scale-100'
-          }`}
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ 
+        opacity: isDragged ? 0.7 : 1, 
+        y: 0,
+      }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ 
+        type: "spring",
+        stiffness: 400,
+        damping: 35,
+        duration: 0.15
+      }}
+      className={`relative group/block rounded-xl transition-all duration-200 ${
+        isDragOver 
+          ? 'ring-2 ring-purple-400 bg-purple-500/10 shadow-lg shadow-purple-500/10 border border-purple-400/30' 
+          : 'border border-transparent'
+      } ${
+        isDragged 
+          ? 'cursor-grabbing z-50 shadow-2xl shadow-purple-500/20 bg-gray-800/80 backdrop-blur-sm' 
+          : ''
+      }`}
+    >
+      {/* Enhanced Sidebar with Drag Handle and Close Button - Show on hover OR focus */}
+      <div className={`absolute -left-3 top-0 flex items-center gap-1 z-50 transition-all duration-300 ${
+        isFocused ? 'opacity-100' : 'opacity-0 group-hover/block:opacity-100'
+      }`}>
+        {/* Drag Handle */}
+        <motion.div
+          whileHover={{ scale: 1.1, backgroundColor: "rgba(139, 92, 246, 0.2)" }}
+          whileTap={{ scale: 0.95 }}
+          className="p-2 text-gray-400 hover:text-purple-300 hover:bg-purple-500/20 rounded-lg transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-sm border border-gray-600/30 shadow-lg"
           draggable
           onDragStart={() => handleDragStart(index)}
-          onDragOver={(e) => handleDragOver(e, index)}
-          onDragLeave={handleDragLeave}
-          onDrop={() => handleDrop(index)}
           onDragEnd={handleDragEnd}
+          title="Drag to reorder"
         >
-          {renderBlockContent(block, index)}
+          <FaGripVertical className="h-4 w-4" />
         </motion.div>
+      
+      </div>
 
-        {/* Enhanced Drop Indicator */}
-        {isDragOver && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            className="absolute inset-0 rounded-xl pointer-events-none z-10"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border-2 border-dashed border-purple-400"></div>
-            
-          </motion.div>
-        )}
+      {/* Block Content Container */}
+      <motion.div 
+        className={`transition-all relative duration-200 ${
+          isDragged 
+            ? 'opacity-80 blur-[1px] scale-105' 
+            : 'opacity-100 blur-0 scale-100'
+        }`}
+        onDragStart={() => handleDragStart(index)}
+        onDragOver={(e) => handleDragOver(e, index)}
+        onDragLeave={handleDragLeave}
+        onDrop={() => handleDrop(index)}
+        onDragEnd={handleDragEnd}
+      >
+        {renderBlockContent(block, index)}
       </motion.div>
-    );
-  };
+
+      {/* Enhanced Drop Indicator */}
+      {isDragOver && (
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          className="absolute inset-0 rounded-xl pointer-events-none z-10"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl border-2 border-dashed border-purple-400"></div>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
 
   const renderBlockContent = (block: BlockWithId, index: number) => {
     switch (block.type) {
@@ -784,7 +750,7 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
         </div>
 
         {/* Content Blocks with Enhanced Sidebar Drag & Drop */}
-        <div className="space-y-8">
+        <div className="">
           <AnimatePresence>
             {blocks.map((block, index) => (
               <div key={block.id}>
@@ -795,7 +761,7 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
         </div>
 
         {/* Add block button at the end */}
-        <div className="mt-8">
+        <div className="">
           <AddBlockButton onAddBlock={(type) => addBlock(type)} />
         </div>
       </motion.div>

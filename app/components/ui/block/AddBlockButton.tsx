@@ -103,7 +103,7 @@ const AddBlockButton = ({ onAddBlock }: AddBlockButtonProps) => {
   };
 
   return (
-    <div className="relative my-6 inline-block" ref={menuRef}>
+    <div className="relative my-2 inline-block" ref={menuRef}>
       {/* Plus button with improved animation */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}

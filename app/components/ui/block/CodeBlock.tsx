@@ -54,7 +54,7 @@ const CodeBlock = ({ block, onChange, onRemove }: CodeBlockProps) => {
 
   return (
     <div 
-      className="relative my-8 group"
+      className="relative my-4 group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

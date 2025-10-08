@@ -625,7 +625,7 @@ export default function PostDetailPage() {
                 return (
                   <div
                     key={index}
-                    className="text-md leading-relaxed mb-5 text-gray-200"
+                    className="text-md leading-relaxed mb-4 text-gray-200"
                     dangerouslySetInnerHTML={{ 
                       __html: processTextContent(block.content || "") 
                     }}

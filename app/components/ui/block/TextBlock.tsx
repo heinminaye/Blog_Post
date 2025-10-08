@@ -249,17 +249,17 @@ const TextBlock = ({
     switch (block.type) {
       case 'heading':
         return {
-          container: 'my-6',
+          container: 'my-4',
           text: 'text-2xl font-extrabold text-gray-200 tracking-tight leading-snug'
         };
       case 'quote':
         return {
-          container: 'border-l-4 border-l-purple-500 pl-8 pr-4 py-2 my-6 relative',
+          container: 'border-l-4 border-l-purple-500 pl-8 pr-4 py-2 my-4 relative',
           text: 'text-lg italic text-gray-300 leading-relaxed'
         };
       default:
         return {
-          container: '',
+          container: 'my-4',
           text: 'text-lg text-gray-200 leading-relaxed'
         };
     }

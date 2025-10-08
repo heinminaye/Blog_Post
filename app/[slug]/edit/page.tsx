@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { PostResponse } from "@/types/post";
 import PostEditor from "@/components/admin/PostEditor";
 import { fetchPostBySlug } from "@/lib/api/api";
+import LoadingDots from "@/components/ui/LoadingDots";
 
 export default function EditPostPage() {
   const { slug } = useParams();
@@ -40,8 +41,8 @@ export default function EditPostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
-        Loading post...
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 flex items-center justify-center overflow-x-hidden">
+        <LoadingDots />
       </div>
     );
   }
