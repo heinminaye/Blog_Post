@@ -102,7 +102,7 @@ export default function PostCard({ post, hasToken, user, onPostDelete }: PostCar
                 {isAuthor ? (
                   <>
                     <Link 
-                      href={`/${post.slug}/edit`} 
+                      href={`/admin/posts/${post.slug}/edit`}
                       className="flex items-center gap-2 px-3 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150"
                       onClick={() => setMenuOpen(false)}
                     >

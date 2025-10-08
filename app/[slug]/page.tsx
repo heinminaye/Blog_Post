@@ -409,7 +409,7 @@ export default function PostDetailPage() {
             {/* Left section with back button and title */}
             <div className="flex items-center">
               <button
-                onClick={() => router.back()}
+                onClick={() => router.push("/")}
                 className="p-1.5 rounded-md text-gray-200 hover:text-white hover:bg-gray-800 focus:outline-none mr-2 transition-colors group relative"
               >
                 <FiArrowLeft className="h-4.5 w-4.5" />
@@ -449,7 +449,7 @@ export default function PostDetailPage() {
               {/* Edit - Desktop */}
               {isAuthor && (
                 <Link
-                  href={`/${post.slug}/edit`}
+                  href={`/admin/posts/${post.slug}/edit`}
                   className="hidden sm:flex items-center bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded-md text-gray-300 text-sm font-medium transition-colors duration-150 border border-gray-700/30 group relative"
                 >
                   <FiEdit3 className="h-3.5 w-3.5 mr-1.5" />
@@ -477,7 +477,7 @@ export default function PostDetailPage() {
               {isAuthor && (
                 <>
                   <Link
-                    href={`/${post.slug}/edit`}
+                    href={`/admin/posts/${post.slug}/edit`}
                     className="sm:hidden p-2 bg-gray-800 hover:bg-gray-700 rounded-md text-gray-300 transition-colors border border-gray-700/30 group relative"
                   >
                     <FiEdit3 className="h-4 w-4" />

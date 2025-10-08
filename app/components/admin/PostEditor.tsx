@@ -522,7 +522,7 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
             {/* Left section with back button and title */}
             <div className="flex items-center">
               <button
-                onClick={() => router.back()}
+                onClick={() => router.push("/")}
                 className="p-1.5 rounded-md text-gray-200 hover:text-white hover:bg-gray-800 focus:outline-none mr-2 transition-colors group relative"
               >
                 <FiArrowLeft className="h-4.5 w-4.5" />
