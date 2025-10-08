@@ -155,7 +155,7 @@ export default function PostDetailPage() {
     try {
       await navigator.clipboard.writeText(codeContent || "");
       setCopied(blockIndex);
-      toast.success("Code copied to clipboard!");
+      // toast.success("Code copied to clipboard!");
     } catch (error) {
       toast.error("Failed to copy code");
     }
@@ -516,12 +516,12 @@ export default function PostDetailPage() {
           transition={{ duration: 0.5 }}
           className="mb-8 bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900/30 rounded-2xl p-6 border border-gray-700/50"
         >
-          <h1 className="text-2xl md:text-4xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 leading-tight">
             {post.title}
           </h1>
 
           {post.excerpt && (
-            <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+            <p className="text-md text-gray-300 mb-6 leading-relaxed">
               {post.excerpt}
             </p>
           )}
@@ -625,7 +625,7 @@ export default function PostDetailPage() {
                 return (
                   <div
                     key={index}
-                    className="text-lg leading-relaxed mb-6 text-gray-200"
+                    className="text-md leading-relaxed mb-5 text-gray-200"
                     dangerouslySetInnerHTML={{ 
                       __html: processTextContent(block.content || "") 
                     }}
@@ -635,7 +635,7 @@ export default function PostDetailPage() {
                 return (
                   <h2
                     key={index}
-                    className="text-2xl font-bold my-8 text-white"
+                    className="text-xl font-bold my-2 text-white"
                     dangerouslySetInnerHTML={{ 
                       __html: processTextContent(block.content || "") 
                     }}
@@ -667,8 +667,8 @@ export default function PostDetailPage() {
                 ) || languageOptions[0];
 
                 return (
-                  <div key={index} className="my-6 bg-gray-800/50 rounded-xl overflow-hidden border border-gray-700">
-                    <div className="bg-gray-900 p-4 border-b border-gray-700 flex justify-between items-center">
+                  <div key={index} className="my-6 bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+                    <div className="bg-gray-800 p-2 pl-4 flex justify-between items-center">
                       <div className="flex items-center gap-2 text-sm font-mono text-gray-300">
                         {languageData.icon}
                         <span className={languageData.color}>
@@ -695,7 +695,7 @@ export default function PostDetailPage() {
                       </button>
                     </div>
 
-                    <div className="p-4 bg-gray-900/50">
+                    <div className="p-4 bg-gray-900">
                       <pre className="overflow-x-auto text-sm text-gray-100 font-mono whitespace-pre-wrap leading-relaxed">
                         <code>{block.content || ""}</code>
                       </pre>
@@ -785,13 +785,13 @@ export default function PostDetailPage() {
                 return (
                   <blockquote
                     key={index}
-                    className="my-8 pl-8 pr-4 py-4 relative border-l-4 border-purple-500 bg-gray-800/30 rounded-r-lg"
+                    className="my-6 pl-6 pr-4 py-2 relative  border-l-4 border-purple-500 bg-gray-700/30 rounded-lg"
                   >
-                    <div className="absolute top-4 left-3 text-purple-500">
+                    <div className="absolute top-2 left-3 text-purple-500">
                       <FaQuoteLeft size={20} />
                     </div>
                     <p 
-                      className="text-xl italic text-gray-300 pl-3 leading-relaxed"
+                      className="text-lg italic text-gray-200 pl-3 leading-relaxed"
                       dangerouslySetInnerHTML={{ 
                         __html: processTextContent(block.content || "") 
                       }}
