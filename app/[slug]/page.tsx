@@ -418,7 +418,7 @@ export default function PostDetailPage() {
                 </div>
               </button>
 
-              <div className="max-w-[200px] sm:max-w-none truncate">
+              <div className="max-w-[200px] pr-2 sm:max-w-none truncate">
                 <h1 className="text-base sm:text-lg font-semibold text-white truncate">
                   {post.title}
                 </h1>

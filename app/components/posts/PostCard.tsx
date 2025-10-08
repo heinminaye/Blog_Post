@@ -226,12 +226,11 @@ export default function PostCard({ post, hasToken, user, onPostDelete }: PostCar
           <div className="flex-1">
             {/* Title */}
             <h2 className="text-lg font-bold mb-2 leading-tight line-clamp-2 min-h-[2rem]">
-              <Link 
-                href={`/${post.slug}`} 
+              <div 
                 className="text-gray-900 dark:text-gray-100 hover:text-purple-600 dark:hover:text-purple-400 transition-colors duration-200 block"
               >
                 {post.title}
-              </Link>
+              </div>
             </h2>
 
             {/* Tags */}
