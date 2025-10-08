@@ -92,16 +92,32 @@ export default function EmptyState({
 
       {hasActiveFilters && (
         <motion.button
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onClearSearch}
-          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-sm shadow-lg shadow-purple-500/20"
-        >
-          {getButtonText()}
-        </motion.button>
+  initial={{ opacity: 0, y: 40, scale: 0.8, rotateX: 15 }}
+  animate={{
+    opacity: 1,
+    y: [40, -10, 0],
+    scale: [0.8, 1.05, 1],
+    rotateX: [15, -5, 0],
+  }}
+  transition={{
+    delay: 0.1,
+    duration: 0.2,
+    ease: [0.25, 0.46, 0.45, 0.94],
+  }}
+  whileHover={{
+    scale: 1.05,
+    y: -3,
+    boxShadow: "0 0 25px rgba(168, 85, 247, 0.5)",
+  }}
+  whileTap={{ scale: 0.95, y: 0 }}
+  onClick={onClearSearch}
+  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white 
+             rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 
+             transition-all duration-300 text-sm shadow-lg shadow-purple-500/20"
+>
+  {getButtonText()}
+</motion.button>
+
       )}
 
       {/* Additional helpful text for empty state */}

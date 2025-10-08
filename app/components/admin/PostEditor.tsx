@@ -208,34 +208,6 @@ export default function PostEditor({ initialPost }: PostEditorProps) {
     }
   };
 
-  const moveBlockUp = (index: number) => {
-    if (index <= 0) return;
-    
-    const newBlocks = [...blocks];
-    const block = newBlocks[index];
-    newBlocks.splice(index, 1);
-    newBlocks.splice(index - 1, 0, block);
-    setBlocks(newBlocks);
-    
-    if (focusedBlockIndex === index) {
-      setFocusedBlockIndex(index - 1);
-    }
-  };
-
-  const moveBlockDown = (index: number) => {
-    if (index >= blocks.length - 1) return;
-    
-    const newBlocks = [...blocks];
-    const block = newBlocks[index];
-    newBlocks.splice(index, 1);
-    newBlocks.splice(index + 1, 0, block);
-    setBlocks(newBlocks);
-    
-    if (focusedBlockIndex === index) {
-      setFocusedBlockIndex(index + 1);
-    }
-  };
-
   const handleImageUpload = async (file: File, index: number) => {
     try {
       const result = await uploadImage(file);
